@@ -43,13 +43,56 @@
   #bossBar { height: 20px; background: #0006; border: 3px solid #1b1b2f; border-radius: 10px; overflow: hidden; position: relative; }
   #bossFill { height: 100%; width: 100%; background: linear-gradient(#ff6b6b, #c9184a); }
   #bossHp { position: absolute; inset: 0; font-size: 14px; line-height: 14px; }
-  #weapon {
-    position: absolute; bottom: 16px; left: 16px;
-    text-align: left; max-width: min(360px, calc(100vw - 32px));
+  #weapon { position: absolute; bottom: 14px; left: 14px; width: min(400px, calc(100vw - 28px)); }
+  .plank {
+    position: relative; padding: 24px 14px 12px; border-radius: 14px;
+    background:
+      repeating-linear-gradient(0deg, transparent 0 25px, rgba(0,0,0,.28) 25px 27px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 3px, rgba(0,0,0,.06) 3px 8px),
+      linear-gradient(180deg, #a0673a, #6b3f1d);
+    border: 3px solid #f5c518;
+    box-shadow: 0 5px 0 #3b2210, inset 0 0 0 3px #3b2210, inset 0 3px 14px rgba(255,220,150,.25);
   }
-  #wName { font-size: 26px; }
-  #wStats { display: flex; gap: 6px; justify-content: flex-start; margin-top: 6px; flex-wrap: wrap; }
-  .chip { background: #1b1b2fcc; border-radius: 10px; padding: 4px 10px; font-size: 15px; }
+  .plank::before, .plank::after {
+    content: ''; position: absolute; top: 9px; width: 9px; height: 9px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff4b0, #c99a06 60%, #6d5200);
+  }
+  .plank::before { left: 9px; } .plank::after { right: 9px; }
+  .ribbon { position: absolute; top: -20px; left: 14px; filter: drop-shadow(0 3px 0 #6a040f); }
+  .ribbon-in {
+    display: flex; align-items: center; gap: 8px; padding: 5px 26px 7px 18px; font-size: 24px;
+    background: linear-gradient(#ff5a5a, #c1121f);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 13px) 50%, 100% 100%, 0 100%, 11px 50%);
+  }
+  .skull { color: #fff3b0; font-size: 20px; }
+  .tier { position: absolute; top: 5px; right: 26px; font-size: 15px; letter-spacing: 2px; color: #3b2210; text-shadow: none; }
+  .tier .on { color: #ffd23f; text-shadow: 0 0 6px #ffb70399, 1px 1px 0 #3b2210; }
+  #wStats { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 5px; border-radius: 10px;
+    font-size: 15px; color: #fff; border: 2px solid rgba(0,0,0,.35);
+    box-shadow: 0 3px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .chip i { font-style: normal; font-size: 13px; }
+  .c-dmg { background: linear-gradient(#ff6b6b, #c1121f); }
+  .c-shot { background: linear-gradient(#5cbcff, #1565c0); }
+  .c-rate { background: linear-gradient(#6ee388, #1f8a3a); }
+  .c-dps { background: linear-gradient(#ffd54a, #e08e00); }
+  .c-pierce { background: linear-gradient(#5ff3f3, #0a8f9f); }
+  .c-boom { background: linear-gradient(#ffa24c, #d9480f); }
+  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 9px; }
+  .lv { font-size: 12px; }
+  .lv .bar { height: 9px; margin-top: 3px; background: #3b2210; border-radius: 5px; overflow: hidden; box-shadow: inset 0 1px 2px #0008; }
+  .lv .bar b { display: block; height: 100%; border-radius: 5px; }
+  .lv-shot b { background: linear-gradient(#8fd3ff, #1d8fe1); }
+  .lv-dmg b { background: linear-gradient(#ff9b9b, #e63946); }
+  .lv-rate b { background: linear-gradient(#9af0ad, #2fb344); }
+  @media (max-width: 600px) {
+    #weapon { width: auto; right: 14px; }
+    .ribbon-in { font-size: 20px; }
+    .chip { font-size: 13px; padding: 3px 8px 4px; }
+    .levels { display: none; }
+  }
   #banner {
     position: absolute; top: 32%; left: 0; right: 0; text-align: center;
     font-size: clamp(34px, 8vw, 64px); opacity: 0; transform: scale(.6); transition: all .25s;
@@ -117,8 +160,12 @@
   </div>
 
   <div id="weapon" class="stroke">
-    <div id="wName">Pištolj</div>
-    <div id="wStats"></div>
+    <div class="plank">
+      <div class="ribbon"><div class="ribbon-in"><span class="skull">☠</span><span id="wName">Pištolj</span></div></div>
+      <div class="tier" id="wTier"></div>
+      <div id="wStats"></div>
+      <div class="levels" id="wLevels"></div>
+    </div>
   </div>
 
   <div id="banner" class="stroke"><span id="bannerMain"></span><span id="bannerSub"></span></div>
@@ -126,7 +173,7 @@
   <div id="startScreen" class="overlay">
     <div class="card">
       <h1>MONSTER<br>LANE</h1>
-      <p>Čudovišta nadiru srednjom stazom. Pomeraj pušku levo-desno i ne daj im da stignu do baze.</p>
+      <p>Čudovišta nadiru srednjom stazom. Pomeraj pirata levo-desno i ne daj im da stignu do baze.</p>
       <div class="legend">
         <div class="sw" style="background:#4aa3ff"></div><div><b>Leva staza — kapije</b>: razbij ih i dobiješ +1 cev, više štete ili bržu paljbu.</div>
         <div class="sw" style="background:#f4c95d"></div><div><b>Desna staza — specijalna oružja</b>: imaju mnogo HP-a, ali kad ih osvojiš dobijaš jače oružje.</div>
@@ -180,11 +227,11 @@ const DEFENSE_Z = 10.5;        // monsters crossing this line damage the base
 const SPAWN_Z = -58;          // where everything appears
 const SCROLL = 4;              // world scroll speed (gates, pedestals, ground)
 const ROAD_LEN = 150, ROAD_Z = -60;
-const FENCE_IN = 5.3, FENCE_OUT = 10.8;
+const FENCE_IN = 7.5, FENCE_OUT = 13;
 const UP_X = -(FENCE_IN + FENCE_OUT) / 2;    // upgrade lane center (left)
 const WPN_X = (FENCE_IN + FENCE_OUT) / 2;    // weapon lane center (right)
-const MOB_HALF = 4.5;                        // monsters walk in x ∈ [-MOB_HALF, MOB_HALF]
-const PLAYER_LIMIT = 10;
+const MOB_HALF = FENCE_IN - 0.8;                       // monsters walk in x ∈ [-MOB_HALF, MOB_HALF]
+const PLAYER_LIMIT = FENCE_OUT - 0.8;
 const MAX_BARRELS = 6, MAX_DMG_LVL = 15, MAX_RATE_LVL = 10;
 const MAX_MOBS = 1200, MAX_BULLETS = 2500, MAX_PARTS = 900;
 const BASE_HP = 100;
@@ -402,7 +449,7 @@ function resize() {
   // along that direction until the full road width (~23 units) fits at the gun's depth
   const off = new THREE.Vector3(0, 24, 14);
   const halfH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-  const k = Math.max(1, 11.8 / (off.length() * halfH * aspect));
+  const k = Math.max(1, (FENCE_OUT + 1) / (off.length() * halfH * aspect));
   camBase.set(0, 0, PLAYER_Z).addScaledVector(off, k);
   camLook.set(0, 0, camBase.z - 28 * k);
   scene.fog.near = 35 + 25 * k;       // a farther camera needs farther fog
@@ -500,7 +547,7 @@ lanePlane(-FENCE_OUT, -FENCE_IN, 0x74b9ff, 0.4, 0.45);   // painted lanes are sm
 lanePlane(-FENCE_IN, FENCE_IN, 0x8f949e, 0.85, 1.0);
 lanePlane(FENCE_IN, FENCE_OUT, 0xf4c95d, 0.4, 0.45);
 
-for (const x of [-4.95, 4.95]) {
+for (const x of [0.35 - FENCE_IN, FENCE_IN - 0.35]) {
   const line = new THREE.Mesh(new THREE.PlaneGeometry(0.18, ROAD_LEN), std(0xf1f1f1, 0, 0.5));
   line.rotation.x = -Math.PI / 2;
   line.position.set(x, 0.02, ROAD_Z);
@@ -542,7 +589,7 @@ rockMesh.castShadow = cactusMesh.castShadow = true;
 rockMesh.frustumCulled = cactusMesh.frustumCulled = false;
 scene.add(rockMesh, cactusMesh);
 const decor = [];
-function sideX() { const s = Math.random() < 0.5 ? -1 : 1; return s * rand(13, 45); }
+function sideX() { const s = Math.random() < 0.5 ? -1 : 1; return s * rand(FENCE_OUT + 2.5, 50); }
 for (let i = 0; i < 60; i++) decor.push({ mesh: rockMesh, i, x: sideX(), z: rand(-150, 20), s: rand(0.4, 1.6), ry: rand(0, 6) });
 for (let i = 0; i < 28; i++) decor.push({ mesh: cactusMesh, i, x: sideX(), z: rand(-150, 20), s: rand(0.7, 1.3), ry: rand(0, 6) });
 
@@ -668,22 +715,101 @@ function buildWeaponModel(id) {
   return g;
 }
 
-// ---------------- player turret ----------------
+// ---------------- player: straw-hat pirate holding the weapon ----------------
 const player = new THREE.Group();
 player.position.set(0, 0, PLAYER_Z);
+player.scale.setScalar(1.15);
 scene.add(player);
-{
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 0.5, 32), std(0x1d4fbf, 0, 0.35, 0.3));
-  base.position.y = 0.25; base.castShadow = true;
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.95, 32, 20), std(0x4c8dff, 0, 0.22, 0.15));
-  dome.scale.y = 0.85; dome.position.y = 0.95; dome.castShadow = true;
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.1, 12, 40), std(0xffd23f, 0.15, 0.25, 1.0));
-  ring.rotation.x = Math.PI / 2; ring.position.y = 0.55;
-  player.add(base, dome, ring);
-}
+const GUN_POS = new THREE.Vector3(0, 0.55, -0.55);     // in torso space
 const gunMount = new THREE.Group();
-gunMount.position.set(0, 1.55, -0.2);
-player.add(gunMount);
+const hero = { hips: [], arms: [], torso: null, head: null };
+{
+  const skin = std(0xf1c27d, 0, 0.55), shortsM = std(0x2a5ea8, 0, 0.8), cuffM = std(0xefe6d0, 0, 0.95);
+  const sashM = std(0xf5c518, 0, 0.5), hairM = std(0x151515, 0, 0.45), sandalM = std(0x6b4226, 0, 0.8);
+  const strawM = std(0xf2cf6b, 0, 0.85), bandM = std(0xc1121f, 0, 0.6), darkM = std(0x111111, 0, 0.4);
+  const vestM = new THREE.MeshStandardMaterial({ color: 0xd62828, roughness: 0.6, side: THREE.DoubleSide });
+  const mesh = (geo, mat, parent, x = 0, y = 0, z = 0) => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z); m.castShadow = true; parent.add(m); return m;
+  };
+  const cyl = (rt, rb, h, seg = 16) => new THREE.CylinderGeometry(rt, rb, h, seg);
+
+  // legs (pivot at the hip so they can swing)
+  for (const s of [-1, 1]) {
+    const hip = new THREE.Group();
+    hip.position.set(s * 0.17, 1.08, 0);
+    player.add(hip);
+    mesh(cyl(0.16, 0.15, 0.46), shortsM, hip, 0, -0.2, 0);
+    mesh(cyl(0.17, 0.17, 0.07), cuffM, hip, 0, -0.43, 0);
+    mesh(cyl(0.085, 0.075, 0.5), skin, hip, 0, -0.7, 0);
+    mesh(new THREE.BoxGeometry(0.17, 0.06, 0.34), sandalM, hip, 0, -1.03, -0.05);
+    hero.hips.push(hip);
+  }
+
+  // torso: waist, yellow sash, bare chest under an open red vest
+  const torso = new THREE.Group();
+  torso.position.y = 1.05;
+  player.add(torso);
+  hero.torso = torso;
+  mesh(cyl(0.29, 0.3, 0.24), shortsM, torso, 0, 0.02, 0);
+  mesh(cyl(0.31, 0.31, 0.1, 20), sashM, torso, 0, 0.16, 0);
+  mesh(new THREE.BoxGeometry(0.07, 0.32, 0.06), sashM, torso, -0.31, 0.02, 0.02).rotation.z = 0.15;
+  mesh(cyl(0.3, 0.26, 0.62, 20), skin, torso, 0, 0.5, 0);
+  // vest wraps the back and sides, open at the front (front = -z, theta = PI)
+  mesh(new THREE.CylinderGeometry(0.315, 0.285, 0.6, 24, 1, true, Math.PI + 0.5, Math.PI * 2 - 1.0), vestM, torso, 0, 0.51, 0);
+  mesh(cyl(0.09, 0.1, 0.14), skin, torso, 0, 0.86, 0);
+
+  // head: messy black hair + the straw hat with a red band
+  const head = new THREE.Group();
+  head.position.y = 1.1;
+  torso.add(head);
+  hero.head = head;
+  mesh(new THREE.SphereGeometry(0.27, 24, 16), skin, head);
+  const hair = mesh(new THREE.SphereGeometry(0.285, 20, 14), hairM, head, 0, 0.05, 0.05);
+  hair.scale.set(1, 0.92, 1);
+  for (let i = 0; i < 9; i++) {
+    const a = -1.2 + i / 8 * (Math.PI + 2.4);           // spikes around the sides and back
+    const spike = mesh(new THREE.ConeGeometry(0.06, 0.2, 6), hairM, head, Math.sin(a) * 0.26, -0.06, Math.cos(a) * 0.26);
+    spike.rotation.set(Math.cos(a) * 1.9, 0, -Math.sin(a) * 1.9);
+  }
+  for (const s of [-1, 1]) mesh(new THREE.SphereGeometry(0.035, 8, 6), darkM, head, s * 0.09, 0.02, -0.25);
+  mesh(new THREE.BoxGeometry(0.07, 0.012, 0.01), bandM, head, -0.1, -0.05, -0.262);   // the scar under the eye
+  const hat = new THREE.Group();
+  hat.position.y = 0.16;
+  hat.rotation.x = 0.12;
+  head.add(hat);
+  mesh(cyl(0.62, 0.64, 0.035, 40), strawM, hat, 0, 0.02, 0);
+  mesh(cyl(0.27, 0.3, 0.24, 28), strawM, hat, 0, 0.15, 0);
+  mesh(cyl(0.305, 0.305, 0.07, 28), bandM, hat, 0, 0.07, 0);
+
+  // arms: pivot at the shoulder, stretched each frame so the hands stay on the weapon
+  const armGeo = cyl(0.075, 0.062, 1, 12); armGeo.translate(0, -0.5, 0);
+  for (const s of [-1, 1]) {
+    const pivot = new THREE.Group();
+    pivot.position.set(s * 0.37, 0.74, 0);
+    torso.add(pivot);
+    mesh(armGeo, skin, pivot);
+    const shoulder = mesh(new THREE.SphereGeometry(0.1, 12, 8), vestM, torso, s * 0.35, 0.76, 0);
+    shoulder.scale.set(1, 0.8, 1);
+    const hand = mesh(new THREE.SphereGeometry(0.085, 12, 8), skin, torso);
+    // right hand on the grip, left hand on the fore-end
+    const grip = s > 0 ? new THREE.Vector3(0.07, -0.12, 0.3) : new THREE.Vector3(-0.05, -0.06, -0.45);
+    hero.arms.push({ pivot, hand, grip });
+  }
+  gunMount.position.copy(GUN_POS);
+  torso.add(gunMount);
+}
+
+const ARM_DOWN = new THREE.Vector3(0, -1, 0), armTmp = new THREE.Vector3();
+function aimArms() {
+  for (const a of hero.arms) {
+    a.hand.position.copy(gunMount.position).add(a.grip);
+    armTmp.copy(a.hand.position).sub(a.pivot.position);
+    const len = armTmp.length();
+    a.pivot.quaternion.setFromUnitVectors(ARM_DOWN, armTmp.divideScalar(len));
+    a.pivot.scale.set(1, len, 1);
+  }
+}
 
 const muzzleTex = (() => {
   const { ctx, tex } = canvasTex(64, 64);
@@ -697,31 +823,33 @@ const muzzleTex = (() => {
 const muzzle = new THREE.Sprite(new THREE.SpriteMaterial({
   map: muzzleTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true,
 }));
-muzzle.scale.setScalar(1.4);
-muzzle.position.set(0, 0, -2.3);
+muzzle.scale.setScalar(1.1);
+muzzle.position.set(0, 0, -1.85);
 
 function rebuildGun() {
   gunMount.clear();
   const w = WEAPONS[state.weaponTier];
   const model = buildWeaponModel(w.id);
-  model.scale.setScalar(1.3);
+  model.scale.setScalar(0.85);
   gunMount.add(model);
+  // extra barrels: a small rack slung under the weapon
   const extra = state.barrels;
   if (extra > 0) {
-    const spanW = Math.min(0.42 * extra, 3.4);
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(spanW + 0.5, 0.18, 0.35), std(0x23272f));
-    bar.position.set(0, -0.45, -0.3);
+    const spanW = Math.min(0.2 * extra, 1.2);
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(spanW + 0.25, 0.1, 0.25), std(0x23272f, 0, 0.35, 0.7));
+    bar.position.set(0, -0.3, -0.45);
     gunMount.add(bar);
     for (let i = 0; i < extra; i++) {
       const k = extra > 1 ? i / (extra - 1) - 0.5 : 0;
-      const geo = new THREE.CylinderGeometry(0.09, 0.09, 1.1, 10); geo.rotateX(Math.PI / 2);
-      const b = new THREE.Mesh(geo, std(w.color, 0.25));
-      b.position.set(k * spanW, -0.45, -0.9);
+      const geo = new THREE.CylinderGeometry(0.05, 0.05, 0.75, 10); geo.rotateX(Math.PI / 2);
+      const b = new THREE.Mesh(geo, std(w.color, 0.25, 0.3, 0.6));
+      b.position.set(k * spanW, -0.3, -0.75);
       b.castShadow = true;
       gunMount.add(b);
     }
   }
   gunMount.add(muzzle);
+  aimArms();
 }
 
 // ---------------- shared instanced meshes ----------------
@@ -849,7 +977,7 @@ function flashLight(x, z, intensity) {
   boomLight.intensity = intensity;
 }
 const muzzleLight = new THREE.PointLight(0xffc870, 0, 9, 2);
-muzzleLight.position.set(0, 1.8, -2.6);
+muzzleLight.position.set(0, 1.6, -2.3);
 player.add(muzzleLight);
 
 const bossGeos = BOSS_PALETTES.map(p => buildMonsterGeo(p));
@@ -873,7 +1001,7 @@ const freshState = () => ({
   baseHp: BASE_HP, score: 0, kills: 0,
   weaponTier: 0, barrels: 0, dmgLvl: 0, rateLvl: 0, upgradesTaken: 0,
   playerX: 0, targetX: 0, fireTimer: 0,
-  gateTimer: 1, pedTimer: 5, clusterTimer: 1.5,
+  gateTimer: 1, pedTimer: 5, clusterTimer: 1.5, wallTimer: 9,
   shake: 0, hurt: 0, muzzle: 0,
 });
 let state = freshState();
@@ -958,14 +1086,21 @@ function updateWeaponHud() {
   $('wName').textContent = w.name;
   const dmg = curDmg(), rate = curRate(), n = curShots();
   const chips = [
-    `ŠTETA ${Math.round(dmg)}`,
-    `METAKA ×${n}`,
-    `${rate.toFixed(1)}/s`,
-    `DPS ~${Math.round(dmg * n * rate)}`,
+    ['c-dmg', '⚔', `ŠTETA ${Math.round(dmg)}`],
+    ['c-shot', '✦', `METAKA ×${n}`],
+    ['c-rate', '⚡', `${rate.toFixed(1)}/s`],
+    ['c-dps', '☠', `DPS ~${Math.round(dmg * n * rate)}`],
   ];
-  if (w.pierce) chips.push(`PROBOJ ${w.pierce}`);
-  if (w.splash) chips.push('EKSPLOZIJA');
-  $('wStats').innerHTML = chips.map(c => `<span class="chip">${c}</span>`).join('');
+  if (w.pierce) chips.push(['c-pierce', '➶', `PROBOJ ${w.pierce}`]);
+  if (w.splash) chips.push(['c-boom', '✹', 'EKSPLOZIJA']);
+  $('wStats').innerHTML = chips.map(([cls, icon, text]) => `<span class="chip ${cls}"><i>${icon}</i>${text}</span>`).join('');
+  $('wTier').innerHTML = WEAPONS.map((_, i) => `<span class="${i <= state.weaponTier ? 'on' : ''}">☠</span>`).join('');
+  const lv = (cls, name, v, max) =>
+    `<div class="lv ${cls}">${name} ${v}/${max}<div class="bar"><b style="width:${v / max * 100}%"></b></div></div>`;
+  $('wLevels').innerHTML =
+    lv('lv-shot', 'CEVI', state.barrels, MAX_BARRELS) +
+    lv('lv-dmg', 'ŠTETA', state.dmgLvl, MAX_DMG_LVL) +
+    lv('lv-rate', 'BRZINA', state.rateLvl, MAX_RATE_LVL);
 }
 
 function updateHud() {
@@ -1061,7 +1196,7 @@ function spawnMonster(x, z, brute) {
   monsters.push({
     kind: 'mob', x, z, hp, maxHp: hp, s,
     hw: 0.5 * s, hd: 0.45 * s,
-    speed: (brute ? 0.7 : 1) * Math.min(6, rand(2.8, 3.6) + w * 0.1),
+    speed: (brute ? 0.7 : 1) * Math.min(6.5, rand(3.0, 3.9) + w * 0.12),
     phase: rand(0, 6.28), flash: 0, dead: false, brute,
     dmg: brute ? 10 : 3, score: brute ? 60 : 10,
     tint: brute ? new THREE.Color(0.75, 0.6, 1.9) : new THREE.Color(1, 1, 1),
@@ -1070,12 +1205,24 @@ function spawnMonster(x, z, brute) {
 
 function spawnCluster(scale = 1) {
   const w = state.wave;
-  const size = Math.max(2, Math.round(Math.min(30, 5 + w * 2.5) * scale * rand(0.8, 1.2)));
-  const cx = rand(-MOB_HALF + 1.2, MOB_HALF - 1.2);
+  const size = Math.max(3, Math.round(Math.min(45, 10 + w * 4) * scale * rand(0.8, 1.2)));
+  const cx = rand(-MOB_HALF + 1.5, MOB_HALF - 1.5);
   for (let i = 0; i < size; i++) {
-    spawnMonster(clamp(cx + rand(-1.8, 1.8), -MOB_HALF, MOB_HALF), SPAWN_Z - rand(0, 5), false);
+    spawnMonster(clamp(cx + rand(-2.8, 2.8), -MOB_HALF, MOB_HALF), SPAWN_Z - rand(0, 7), false);
   }
-  if (w >= 2 && Math.random() < 0.15 + w * 0.04) spawnMonster(cx, SPAWN_Z - 6, true);
+  if (Math.random() < 0.1 + w * 0.05) spawnMonster(cx, SPAWN_Z - 8, true);
+}
+
+// a wall of monsters across the whole lane: forces the player to sweep instead of camping
+function spawnWall() {
+  const w = state.wave;
+  const rows = w >= 4 ? 3 : 2;
+  const cols = Math.round(MOB_HALF * 2 / 0.85);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      spawnMonster(-MOB_HALF + (c + 0.5) * (MOB_HALF * 2 / cols) + rand(-0.2, 0.2), SPAWN_Z - r * 1.3 - rand(0, 0.4), false);
+    }
+  }
 }
 
 function spawnGate() {
@@ -1371,7 +1518,7 @@ function updateBullets(dt) {
         (b.hits ||= new Set()).add(best);
       } else { dead = true; break; }
     }
-    if (dead || b.z < SPAWN_Z - 10 || Math.abs(b.x) > 12) {
+    if (dead || b.z < SPAWN_Z - 10 || Math.abs(b.x) > FENCE_OUT + 1.5) {
       bullets[i] = bullets[bullets.length - 1];
       bullets.pop();
     }
@@ -1492,6 +1639,7 @@ function startWave() {
   state.waveTime = 0;
   state.bossSpawned = false;
   state.clusterTimer = 1;
+  state.wallTimer = 8;
   banner(`TALAS ${state.wave}`, `Boss na kraju: ${bossHpFor(state.wave)} HP`);
 }
 
@@ -1508,12 +1656,14 @@ function updateWave(dt) {
   if (!state.bossSpawned) {
     if (state.clusterTimer <= 0) {
       spawnCluster();
-      state.clusterTimer = Math.max(0.7, 2.3 - state.wave * 0.15) * rand(0.8, 1.2);
+      state.clusterTimer = Math.max(0.45, 1.5 - state.wave * 0.12) * rand(0.8, 1.2);
     }
+    state.wallTimer -= dt;
+    if (state.wallTimer <= 0) { spawnWall(); state.wallTimer = Math.max(6, 11 - state.wave) * rand(0.9, 1.1); }
     if (state.waveTime >= waveDuration(state.wave)) spawnBoss();
   } else {
     // lighter escort while the boss walks in
-    if (state.clusterTimer <= 0) { spawnCluster(0.5); state.clusterTimer = rand(3, 4); }
+    if (state.clusterTimer <= 0) { spawnCluster(0.6); state.clusterTimer = rand(2, 2.8); }
     if (bosses.length === 0) {
       state.bossSpawned = false;
       state.betweenWaves = 4;
@@ -1540,7 +1690,15 @@ function updatePlayer(dt) {
   if (dir) state.targetX = clamp(state.targetX + dir * 16 * dt, -PLAYER_LIMIT, PLAYER_LIMIT);
   state.playerX += (state.targetX - state.playerX) * Math.min(1, dt * 14);
   player.position.x = state.playerX;
-  player.rotation.z = (state.targetX - state.playerX) * -0.04;
+  const vx = state.targetX - state.playerX;
+  player.rotation.z = clamp(vx * -0.05, -0.25, 0.25);
+  // run cycle (the world scrolls toward him) + a lean when strafing
+  const walk = state.time * 10;
+  hero.hips[0].rotation.x = Math.sin(walk) * 0.6;
+  hero.hips[1].rotation.x = -Math.sin(walk) * 0.6;
+  hero.torso.position.y = 1.05 + Math.abs(Math.cos(walk)) * 0.05;
+  hero.torso.rotation.y = Math.sin(walk) * 0.05;
+  hero.head.rotation.z = Math.sin(walk) * -0.04;
 
   state.fireTimer -= dt;
   const interval = 1 / curRate();
@@ -1551,7 +1709,8 @@ function updatePlayer(dt) {
   muzzleLight.intensity = muzzle.visible ? 30 : 0;
   muzzleLight.color.setHex(curWeapon().color);
   if (muzzle.visible) muzzle.material.rotation = Math.random() * 6;
-  gunMount.position.z = -0.2 + Math.max(0, state.muzzle) * 2;   // small recoil
+  gunMount.position.z = GUN_POS.z + Math.max(0, state.muzzle) * 1.6;   // small recoil
+  aimArms();
 }
 
 function updateFx(dt) {
