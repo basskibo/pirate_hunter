@@ -244,7 +244,7 @@ const BOSS_NAMES = ['ŽUTI GRMALJ', 'LJUBIČASTI KRALJ', 'ZELENI DIV', 'MRAČNI 
 
 // capture = HP of the pedestal that must be shot down to get the weapon
 const WEAPONS = [
-  { id: 'pistol',  name: 'Pištolj',       dmg: 10, rate: 4,   speed: 55, spread: 0.03, pellets: 1, pierce: 0, splash: 0,   color: 0xffd23f, size: 1,   len: 1, capture: 0 },
+  { id: 'pistol',  name: 'Pištolj',       dmg: 10, rate: 5,   speed: 55, spread: 0.03, pellets: 1, pierce: 0, splash: 0,   color: 0xffd23f, size: 1,   len: 1, capture: 0 },
   { id: 'smg',     name: 'Minigun',       dmg: 9,  rate: 13,  speed: 62, spread: 0.07, pellets: 1, pierce: 0, splash: 0,   color: 0xff9f1c, size: 0.9, len: 1, capture: 500 },
   { id: 'shotgun', name: 'Sačmara',       dmg: 15, rate: 2.6, speed: 52, spread: 0.30, pellets: 5, pierce: 0, splash: 0,   color: 0xfff3b0, size: 0.9, len: 0.8, capture: 1000 },
   { id: 'laser',   name: 'Laser',         dmg: 24, rate: 7,   speed: 95, spread: 0.02, pellets: 1, pierce: 5, splash: 0,   color: 0x3ff3ff, size: 0.9, len: 3, capture: 1800 },
@@ -718,7 +718,7 @@ function buildWeaponModel(id) {
 // ---------------- player: straw-hat pirate holding the weapon ----------------
 const player = new THREE.Group();
 player.position.set(0, 0, PLAYER_Z);
-player.scale.setScalar(1.15);
+player.scale.setScalar(1.4);
 scene.add(player);
 const GUN_POS = new THREE.Vector3(0, 0.55, -0.55);     // in torso space
 const gunMount = new THREE.Group();
@@ -1205,7 +1205,7 @@ function spawnMonster(x, z, brute) {
 
 function spawnCluster(scale = 1) {
   const w = state.wave;
-  const size = Math.max(3, Math.round(Math.min(45, 10 + w * 4) * scale * rand(0.8, 1.2)));
+  const size = Math.max(3, Math.round(Math.min(45, 5 + w * 4) * scale * rand(0.8, 1.2)));
   const cx = rand(-MOB_HALF + 1.5, MOB_HALF - 1.5);
   for (let i = 0; i < size; i++) {
     spawnMonster(clamp(cx + rand(-2.8, 2.8), -MOB_HALF, MOB_HALF), SPAWN_Z - rand(0, 7), false);
@@ -1231,7 +1231,7 @@ function spawnGate() {
   if (!types.length) return;   // fully upgraded
   const type = types[Math.floor(Math.random() * types.length)];
   const def = GATE_DEFS[type];
-  const hp = Math.round((30 + state.wave * 15) * Math.pow(1.13, state.upgradesTaken));
+  const hp = Math.round((15 + state.wave * 12) * Math.pow(1.13, state.upgradesTaken));
 
   const group = new THREE.Group();
   const postMat = std(0xeef6ff, 0, 0.2, 0.6);
@@ -1525,7 +1525,7 @@ function updateBullets(dt) {
   }
   let n = 0;
   for (const b of bullets) {
-    dummy.position.set(b.x, 1.5, b.z);
+    dummy.position.set(b.x, 1.2 + 1.0 * Math.exp((b.z - PLAYER_Z + 2.2) / 4), b.z);
     dummy.rotation.set(0, Math.atan2(b.vx, b.vz), 0);
     dummy.scale.set(b.size, b.size, b.size * b.len);
     dummy.updateMatrix();
@@ -1655,11 +1655,12 @@ function updateWave(dt) {
   state.clusterTimer -= dt;
   if (!state.bossSpawned) {
     if (state.clusterTimer <= 0) {
-      spawnCluster();
-      state.clusterTimer = Math.max(0.45, 1.5 - state.wave * 0.12) * rand(0.8, 1.2);
+      const ramp = 0.5 + 0.5 * Math.min(1, state.waveTime / 25);   // each wave starts softer
+      spawnCluster(ramp);
+      state.clusterTimer = Math.max(0.45, 1.9 - state.wave * 0.15) * rand(0.8, 1.2);
     }
     state.wallTimer -= dt;
-    if (state.wallTimer <= 0) { spawnWall(); state.wallTimer = Math.max(6, 11 - state.wave) * rand(0.9, 1.1); }
+    if (state.wallTimer <= 0 && state.wave >= 2) { spawnWall(); state.wallTimer = Math.max(6, 11 - state.wave) * rand(0.9, 1.1); }
     if (state.waveTime >= waveDuration(state.wave)) spawnBoss();
   } else {
     // lighter escort while the boss walks in
@@ -1930,6 +1931,11 @@ const qs = new URLSearchParams(location.search);
 if (qs.has('auto')) {
   autoQuality = false;
   if (qs.has('q')) applyQuality(Number(qs.get('q')));
+  if (qs.has('closeup')) {
+    camBase.set(3, 5, PLAYER_Z + 6);
+    camera.position.copy(camBase);
+    camera.lookAt(0, 2, PLAYER_Z - 1);
+  }
   startGame();
   const sim = Number(qs.get('sim') || 0);
   for (let t = 0; t < sim && state.running; t += 1 / 60) {
